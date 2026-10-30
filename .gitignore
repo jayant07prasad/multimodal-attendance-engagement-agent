@@ -1,5 +1,7 @@
 .venv/
+venv/
 __pycache__/
-*.pyc
-uploaded_video.mp4
+*.py[cod]
+.env
+.streamlit/secrets.toml
 .DS_Store

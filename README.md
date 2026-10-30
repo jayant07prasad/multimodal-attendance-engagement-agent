@@ -1,169 +1,110 @@
 # Multimodal Attendance & Engagement Agent
 
-An AI-powered classroom analytics prototype that combines computer vision, audio activity analysis, and Generative AI to provide classroom session insights.
+A classroom-session analysis prototype that combines video face-presence indicators,
+WAV audio-energy indicators, simple multimodal fusion, rule-based teaching suggestions,
+session analytics, and an optional Gemini-generated report.
 
-## Overview
+## Important scope and limitations
 
-The Multimodal Attendance & Engagement Agent is an educational analytics application designed to analyze classroom video and audio recordings.
+- Live webcam and microphone capture are available through WebRTC in the Live Classroom Mode.
+- Uploaded video (MP4, AVI, MOV) and WAV analysis remain available as an alternative.
+- Live audio speech-like/noise-like labels use lightweight signal heuristics (RMS, zero-crossing
+  rate and spectral centroid), not a trained speech/noise classifier.
+- Face detection is not identity recognition. Temporary face labels are rough frame-to-frame
+  proximity matches and are not reliable student identities.
+- Live speech/noise classification is heuristic and can mistake music, classroom noise, or other sounds for speech.
+- The combined value is an experimental activity indicator, **not a validated engagement score**.
+- Do not use the output as proof of attendance, attention, emotion, or learning. Obtain consent
+  and have an instructor verify attendance.
 
-It uses OpenCV for visible face presence detection, audio signal energy analysis for estimating active sound segments, and Google's Gemini API to generate an AI-powered classroom analytics report.
+## Requirements
 
-The application provides experimental indicators and teaching improvement suggestions through an interactive Streamlit dashboard.
+- Windows 10/11, macOS, or Linux
+- Python 3.10–3.13 (64-bit recommended)
+- Internet only for installing packages and optional Gemini reports
+- For Gemini reports, a Gemini API key
 
-## Key Features
+## Windows setup (PowerShell)
 
-### 1. Vision Analysis
-- Uses OpenCV Haar Cascade face detection.
-- Processes sampled frames from uploaded classroom videos.
-- Estimates visible face presence.
-- Calculates average detected faces per sampled frame.
+Open PowerShell in this project folder and run:
 
-### 2. Audio Analysis
-- Accepts PCM WAV audio recordings.
-- Analyzes audio signal energy.
-- Estimates the percentage of active audio segments.
-- Provides a basic audio activity indicator.
-
-### 3. Combined Activity Indicator
-- Combines available video and audio indicators.
-- Generates an experimental session activity score.
-- Provides a basic overview of classroom activity.
-
-### 4. Gemini AI-Powered Analysis
-- Integrates Google's Gemini API.
-- Generates structured classroom analytics reports.
-- Provides key observations and possible classroom interpretations.
-- Suggests practical teaching improvements.
-- Highlights limitations of the available data.
-
-### 5. Interactive Dashboard
-- Built using Streamlit.
-- Supports video and audio uploads.
-- Displays analysis results.
-- Allows users to view and download AI-generated reports.
-
-## Technologies Used
-
-- Python
-- Streamlit
-- OpenCV
-- NumPy
-- Google Gemini API
-- Google GenAI SDK
-- Python-dotenv
-
-## Project Workflow
-
-1. Upload a classroom video in MP4, AVI, or MOV format.
-2. Upload an audio recording in PCM WAV format.
-3. Analyze video frames to estimate visible face presence.
-4. Analyze audio energy to estimate active sound segments.
-5. Calculate an experimental combined activity indicator.
-6. Send the analysis metrics to Gemini AI.
-7. Generate a structured classroom analytics report.
-8. View and download the generated report.
-
-## Installation and Setup
-
-### Prerequisites
-- Python 3.10 or newer
-- Git
-- Gemini API key
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/jayant07prasad/multimodal-attendance-engagement-agent.git
-cd multimodal-attendance-engagement-agent
-```
-
-### 2. Create a Virtual Environment
-
-**Windows:**
-
-```bash
-py -m venv .venv
+```powershell
+py -3.13 -m venv .venv
 .\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+Copy-Item .env.example .env
 ```
 
-**macOS/Linux:**
+Open `.env` and replace the placeholder with your own key:
+
+```env
+GEMINI_API_KEY=your_real_api_key
+```
+
+Never upload `.env` or share your API key on GitHub.
+
+Run:
+
+```powershell
+streamlit run app.py
+```
+
+Open the local address printed in the terminal (usually http://localhost:8501).
+
+## macOS / Linux setup
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-```
-
-### 3. Install Dependencies
-
-```bash
+python -m pip install --upgrade pip
 pip install -r requirements.txt
-pip install google-genai python-dotenv
-```
-
-### 4. Configure Gemini API Key
-
-Create a file named `.env` in the project root directory.
-
-Add your Gemini API key:
-
-```env
-GEMINI_API_KEY=your_api_key_here
-```
-
-Replace `your_api_key_here` with your actual API key.
-
-**Important:** Never upload your `.env` file or API key to GitHub.
-
-### 5. Run the Application
-
-```bash
+cp .env.example .env
 streamlit run app.py
 ```
 
-Open the local URL displayed in the terminal, usually:
+## Inputs
 
-`http://localhost:8501`
+- Video: MP4 / AVI / MOV. OpenCV must be able to decode the codec.
+- Audio: WAV containing uncompressed PCM samples (8-bit, 16-bit, or 32-bit).
 
-## Supported Input Formats
+If a video cannot be opened, try exporting it as MP4 (H.264) or AVI. Some phone recordings
+use codecs that the local OpenCV build cannot decode.
 
-| Input | Supported Formats |
-|---|---|
-| Video | MP4, AVI, MOV |
-| Audio | PCM WAV |
+## Project workflow
 
-## Privacy and Responsible Use
+1. Start Live Classroom Mode and grant browser camera/microphone permission, or upload a classroom video and/or WAV audio recording.
+2. The vision module samples frames and detects visible faces using OpenCV Haar cascades.
+3. The live audio module estimates speech-like/noise-like/silent segments using simple signal features; uploaded WAV analysis calculates RMS energy and active/silent segments.
+4. The multimodal agent collects available features.
+5. The fusion function averages the available video-presence and audio-activity percentages.
+6. Rule-based suggestions and session summary are displayed.
+7. Optionally request a Gemini report and download it as text.
 
-This application is an experimental prototype, not a production attendance system.
+## Tests
 
-- It does not identify students or perform identity recognition.
-- It does not detect or infer emotions.
-- Visible face presence does not prove that someone is paying attention.
-- Audio energy does not necessarily represent meaningful speech.
-- The combined activity indicator is not a scientifically validated engagement score.
-- Video and audio recordings with different durations may not represent the same observation period.
+Run the lightweight analysis tests:
 
-Recordings should only be processed with appropriate consent and handled securely. AI-generated observations should be reviewed by an instructor before being used for decisions.
+```powershell
+python -m unittest discover -s tests -v
+```
 
-## Future Improvements
+## Folder structure
 
-- Real-time classroom analytics.
-- Improved video and audio synchronization.
-- Advanced speech activity analysis.
-- Instructor-managed session history.
-- Better visualization of classroom activity trends.
-- Authentication and secure data storage.
-- Deployment for wider accessibility.
+```text
+Multimodal_Attendance_Engagement_Agent_Final/
+├── app.py
+├── requirements.txt
+├── .env.example
+├── .gitignore
+├── README.md
+├── PREREQUISITES.md
+├── RUN_PROJECT.bat
+└── tests/
+    └── test_analysis.py
+```
 
-## Author
 
-**Jayant Prasad**
+## Live metrics refresh
 
-Computer Science Engineering Student
-
-GitHub: [@jayant07prasad](https://github.com/jayant07prasad)
-
-## Project Status
-
-**Current Status:** Working Prototype
-
-The project includes video analysis, audio activity estimation, Gemini AI-powered report generation, and report download functionality.
+The live counters are stored on the active WebRTC processor instances so they persist across Streamlit reruns. Use **Refresh metrics** to read the latest values without resetting the active processors.
