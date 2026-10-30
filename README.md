@@ -83,7 +83,7 @@ cd multimodal-attendance-engagement-agent
 
 ```bash
 py -m venv .venv
-.venv\Scripts\activate
+.\.venv\Scripts\Activate.ps1
 ```
 
 **macOS/Linux:**
